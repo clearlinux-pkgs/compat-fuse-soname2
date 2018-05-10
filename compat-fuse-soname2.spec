@@ -4,7 +4,7 @@
 #
 Name     : compat-fuse-soname2
 Version  : 2.9.4
-Release  : 5
+Release  : 6
 URL      : http://downloads.sourceforge.net/fuse/fuse-2.9.4.tar.gz
 Source0  : http://downloads.sourceforge.net/fuse/fuse-2.9.4.tar.gz
 Summary  : Filesystem in Userspace
