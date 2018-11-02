@@ -4,15 +4,16 @@
 #
 Name     : compat-fuse-soname2
 Version  : 2.9.4
-Release  : 6
+Release  : 7
 URL      : http://downloads.sourceforge.net/fuse/fuse-2.9.4.tar.gz
 Source0  : http://downloads.sourceforge.net/fuse/fuse-2.9.4.tar.gz
 Summary  : Filesystem in Userspace
 Group    : Development/Tools
 License  : GPL-2.0 LGPL-2.1
-Requires: compat-fuse-soname2-bin
-Requires: compat-fuse-soname2-lib
-Requires: compat-fuse-soname2-doc
+Requires: compat-fuse-soname2-bin = %{version}-%{release}
+Requires: compat-fuse-soname2-lib = %{version}-%{release}
+Requires: compat-fuse-soname2-license = %{version}-%{release}
+Requires: compat-fuse-soname2-man = %{version}-%{release}
 
 %description
 General Information
@@ -25,6 +26,8 @@ create and mount their own filesystem implementations.
 %package bin
 Summary: bin components for the compat-fuse-soname2 package.
 Group: Binaries
+Requires: compat-fuse-soname2-license = %{version}-%{release}
+Requires: compat-fuse-soname2-man = %{version}-%{release}
 
 %description bin
 bin components for the compat-fuse-soname2 package.
@@ -33,28 +36,37 @@ bin components for the compat-fuse-soname2 package.
 %package dev
 Summary: dev components for the compat-fuse-soname2 package.
 Group: Development
-Requires: compat-fuse-soname2-lib
-Requires: compat-fuse-soname2-bin
-Provides: compat-fuse-soname2-devel
+Requires: compat-fuse-soname2-lib = %{version}-%{release}
+Requires: compat-fuse-soname2-bin = %{version}-%{release}
+Provides: compat-fuse-soname2-devel = %{version}-%{release}
 
 %description dev
 dev components for the compat-fuse-soname2 package.
 
 
-%package doc
-Summary: doc components for the compat-fuse-soname2 package.
-Group: Documentation
-
-%description doc
-doc components for the compat-fuse-soname2 package.
-
-
 %package lib
 Summary: lib components for the compat-fuse-soname2 package.
 Group: Libraries
+Requires: compat-fuse-soname2-license = %{version}-%{release}
 
 %description lib
 lib components for the compat-fuse-soname2 package.
+
+
+%package license
+Summary: license components for the compat-fuse-soname2 package.
+Group: Default
+
+%description license
+license components for the compat-fuse-soname2 package.
+
+
+%package man
+Summary: man components for the compat-fuse-soname2 package.
+Group: Default
+
+%description man
+man components for the compat-fuse-soname2 package.
 
 
 %prep
@@ -65,9 +77,9 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1505676444
+export SOURCE_DATE_EPOCH=1541203050
 %configure --disable-static
-make V=1  %{?_smp_mflags}
+make  %{?_smp_mflags}
 
 %check
 export LANG=C
@@ -77,8 +89,11 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check
 
 %install
-export SOURCE_DATE_EPOCH=1505676444
+export SOURCE_DATE_EPOCH=1541203050
 rm -rf %{buildroot}
+mkdir -p %{buildroot}/usr/share/package-licenses/compat-fuse-soname2
+cp COPYING %{buildroot}/usr/share/package-licenses/compat-fuse-soname2/COPYING
+cp COPYING.LIB %{buildroot}/usr/share/package-licenses/compat-fuse-soname2/COPYING.LIB
 %make_install
 
 %files
@@ -106,15 +121,20 @@ rm -rf %{buildroot}
 /usr/lib64/libulockmgr.so
 /usr/lib64/pkgconfig/fuse.pc
 
-%files doc
-%defattr(-,root,root,-)
-%exclude /usr/share/man/man1/fusermount.1
-%exclude /usr/share/man/man1/ulockmgr_server.1
-%exclude /usr/share/man/man8/mount.fuse.8
-
 %files lib
 %defattr(-,root,root,-)
 /usr/lib64/libfuse.so.2
 /usr/lib64/libfuse.so.2.9.4
 /usr/lib64/libulockmgr.so.1
 /usr/lib64/libulockmgr.so.1.0.1
+
+%files license
+%defattr(0644,root,root,0755)
+/usr/share/package-licenses/compat-fuse-soname2/COPYING
+/usr/share/package-licenses/compat-fuse-soname2/COPYING.LIB
+
+%files man
+%defattr(0644,root,root,0755)
+%exclude /usr/share/man/man1/fusermount.1
+%exclude /usr/share/man/man1/ulockmgr_server.1
+%exclude /usr/share/man/man8/mount.fuse.8
