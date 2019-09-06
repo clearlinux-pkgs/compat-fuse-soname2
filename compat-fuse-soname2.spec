@@ -4,21 +4,21 @@
 #
 Name     : compat-fuse-soname2
 Version  : 2.9.9
-Release  : 9
+Release  : 10
 URL      : https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz
 Source0  : https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz
 Summary  : Filesystem in Userspace
 Group    : Development/Tools
 License  : GPL-2.0 LGPL-2.1
-Requires: compat-fuse-soname2-bin = %{version}-%{release}
 Requires: compat-fuse-soname2-lib = %{version}-%{release}
 Requires: compat-fuse-soname2-license = %{version}-%{release}
-Requires: compat-fuse-soname2-man = %{version}-%{release}
 BuildRequires : gcc-dev32
 BuildRequires : gcc-libgcc32
 BuildRequires : gcc-libstdc++32
 BuildRequires : glibc-dev32
 BuildRequires : glibc-libc32
+# Suppress generation of debuginfo
+%global debug_package %{nil}
 
 %description
 libfuse
@@ -26,21 +26,12 @@ libfuse
 Warning: unresolved security issue
 ----------------------------------
 
-%package bin
-Summary: bin components for the compat-fuse-soname2 package.
-Group: Binaries
-Requires: compat-fuse-soname2-license = %{version}-%{release}
-
-%description bin
-bin components for the compat-fuse-soname2 package.
-
-
 %package dev
 Summary: dev components for the compat-fuse-soname2 package.
 Group: Development
 Requires: compat-fuse-soname2-lib = %{version}-%{release}
-Requires: compat-fuse-soname2-bin = %{version}-%{release}
 Provides: compat-fuse-soname2-devel = %{version}-%{release}
+Requires: compat-fuse-soname2 = %{version}-%{release}
 
 %description dev
 dev components for the compat-fuse-soname2 package.
@@ -50,7 +41,6 @@ dev components for the compat-fuse-soname2 package.
 Summary: dev32 components for the compat-fuse-soname2 package.
 Group: Default
 Requires: compat-fuse-soname2-lib32 = %{version}-%{release}
-Requires: compat-fuse-soname2-bin = %{version}-%{release}
 Requires: compat-fuse-soname2-dev = %{version}-%{release}
 
 %description dev32
@@ -83,14 +73,6 @@ Group: Default
 license components for the compat-fuse-soname2 package.
 
 
-%package man
-Summary: man components for the compat-fuse-soname2 package.
-Group: Default
-
-%description man
-man components for the compat-fuse-soname2 package.
-
-
 %prep
 %setup -q -n fuse-2.9.9
 pushd ..
@@ -101,23 +83,27 @@ popd
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-export LANG=C
-export SOURCE_DATE_EPOCH=1552349560
-export LDFLAGS="${LDFLAGS} -fno-lto"
+export LANG=C.UTF-8
+export SOURCE_DATE_EPOCH=1567808285
+export GCC_IGNORE_WERROR=1
+export CFLAGS="$CFLAGS -fno-lto "
+export FCFLAGS="$CFLAGS -fno-lto "
+export FFLAGS="$CFLAGS -fno-lto "
+export CXXFLAGS="$CXXFLAGS -fno-lto "
 %configure --disable-static
 make  %{?_smp_mflags}
 
 pushd ../build32/
 export PKG_CONFIG_PATH="/usr/lib32/pkgconfig"
 export ASFLAGS="${ASFLAGS}${ASFLAGS:+ }--32"
-export CFLAGS="${CFLAGS}${CFLAGS:+ }-m32"
-export CXXFLAGS="${CXXFLAGS}${CXXFLAGS:+ }-m32"
-export LDFLAGS="${LDFLAGS}${LDFLAGS:+ }-m32"
+export CFLAGS="${CFLAGS}${CFLAGS:+ }-m32 -mstackrealign"
+export CXXFLAGS="${CXXFLAGS}${CXXFLAGS:+ }-m32 -mstackrealign"
+export LDFLAGS="${LDFLAGS}${LDFLAGS:+ }-m32 -mstackrealign"
 %configure --disable-static    --libdir=/usr/lib32 --build=i686-generic-linux-gnu --host=i686-generic-linux-gnu --target=i686-clr-linux-gnu
 make  %{?_smp_mflags}
 popd
 %check
-export LANG=C
+export LANG=C.UTF-8
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
@@ -126,7 +112,7 @@ cd ../build32;
 make VERBOSE=1 V=1 %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1552349560
+export SOURCE_DATE_EPOCH=1567808285
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/compat-fuse-soname2
 cp COPYING %{buildroot}/usr/share/package-licenses/compat-fuse-soname2/COPYING
@@ -141,20 +127,21 @@ popd
 fi
 popd
 %make_install
+## Remove excluded files
+rm -f %{buildroot}/usr/bin/fusermount
+rm -f %{buildroot}/usr/bin/mount.fuse
+rm -f %{buildroot}/usr/bin/ulockmgr_server
+rm -f %{buildroot}/usr/include/ulockmgr.h
+rm -f %{buildroot}/usr/share/man/man1/fusermount.1
+rm -f %{buildroot}/usr/share/man/man1/ulockmgr_server.1
+rm -f %{buildroot}/usr/share/man/man8/mount.fuse.8
 
 %files
 %defattr(-,root,root,-)
 
-%files bin
-%defattr(-,root,root,-)
-%exclude /usr/bin/fusermount
-%exclude /usr/bin/mount.fuse
-%exclude /usr/bin/ulockmgr_server
-
 %files dev
 %defattr(-,root,root,-)
-%exclude /usr/include/ulockmgr.h
-/usr/include/*.h
+/usr/include/fuse.h
 /usr/include/fuse/cuse_lowlevel.h
 /usr/include/fuse/fuse.h
 /usr/include/fuse/fuse_common.h
@@ -192,9 +179,3 @@ popd
 %defattr(0644,root,root,0755)
 /usr/share/package-licenses/compat-fuse-soname2/COPYING
 /usr/share/package-licenses/compat-fuse-soname2/COPYING.LIB
-
-%files man
-%defattr(0644,root,root,0755)
-%exclude /usr/share/man/man1/fusermount.1
-%exclude /usr/share/man/man1/ulockmgr_server.1
-%exclude /usr/share/man/man8/mount.fuse.8
