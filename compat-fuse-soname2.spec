@@ -4,7 +4,7 @@
 #
 Name     : compat-fuse-soname2
 Version  : 2.9.9
-Release  : 10
+Release  : 11
 URL      : https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz
 Source0  : https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz
 Summary  : Filesystem in Userspace
