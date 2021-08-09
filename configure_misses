@@ -1,2 +1,3 @@
+Configure miss: 32-bit host C ABI
 Configure miss: struct stat.st_atimespec
 Configure miss: struct stat.st_atimespec

@@ -6,7 +6,7 @@
 #
 Name     : compat-fuse-soname2
 Version  : 2.9.9
-Release  : 12
+Release  : 13
 URL      : https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz
 Source0  : https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz
 Source1  : https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz.asc
@@ -15,13 +15,23 @@ Group    : Development/Tools
 License  : GPL-2.0 LGPL-2.1
 Requires: compat-fuse-soname2-lib = %{version}-%{release}
 Requires: compat-fuse-soname2-license = %{version}-%{release}
+BuildRequires : automake
+BuildRequires : automake-dev
 BuildRequires : gcc-dev32
 BuildRequires : gcc-libgcc32
 BuildRequires : gcc-libstdc++32
+BuildRequires : gettext-bin
 BuildRequires : glibc-dev32
 BuildRequires : glibc-libc32
+BuildRequires : libtool
+BuildRequires : libtool-dev
+BuildRequires : m4
+BuildRequires : pkg-config-dev
 # Suppress generation of debuginfo
 %global debug_package %{nil}
+Patch1: 0001-Whitelist-UFSD-backport-to-2.9-branch-452.patch
+Patch2: 0002-Correct-errno-comparison-571.patch
+Patch3: 0003-util-ulockmgr_server.c-conditionally-define-closefro.patch
 
 %description
 libfuse
@@ -79,6 +89,9 @@ license components for the compat-fuse-soname2 package.
 %prep
 %setup -q -n fuse-2.9.9
 cd %{_builddir}/fuse-2.9.9
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
 pushd ..
 cp -a fuse-2.9.9 build32
 popd
@@ -88,24 +101,24 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1604443134
+export SOURCE_DATE_EPOCH=1628528712
 export GCC_IGNORE_WERROR=1
 export CFLAGS="$CFLAGS -fno-lto "
 export FCFLAGS="$FFLAGS -fno-lto "
 export FFLAGS="$FFLAGS -fno-lto "
 export CXXFLAGS="$CXXFLAGS -fno-lto "
-%configure --disable-static
+%reconfigure --disable-static
 make  %{?_smp_mflags}
-
 pushd ../build32/
 export PKG_CONFIG_PATH="/usr/lib32/pkgconfig"
 export ASFLAGS="${ASFLAGS}${ASFLAGS:+ }--32"
 export CFLAGS="${CFLAGS}${CFLAGS:+ }-m32 -mstackrealign"
 export CXXFLAGS="${CXXFLAGS}${CXXFLAGS:+ }-m32 -mstackrealign"
 export LDFLAGS="${LDFLAGS}${LDFLAGS:+ }-m32 -mstackrealign"
-%configure --disable-static    --libdir=/usr/lib32 --build=i686-generic-linux-gnu --host=i686-generic-linux-gnu --target=i686-clr-linux-gnu
+%reconfigure --disable-static   --libdir=/usr/lib32 --build=i686-generic-linux-gnu --host=i686-generic-linux-gnu --target=i686-clr-linux-gnu
 make  %{?_smp_mflags}
 popd
+
 %check
 export LANG=C.UTF-8
 export http_proxy=http://127.0.0.1:9/
@@ -116,7 +129,7 @@ cd ../build32;
 make %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1604443134
+export SOURCE_DATE_EPOCH=1628528712
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/compat-fuse-soname2
 cp %{_builddir}/fuse-2.9.9/COPYING %{buildroot}/usr/share/package-licenses/compat-fuse-soname2/4cc77b90af91e615a64ae04893fdffa7939db84c
